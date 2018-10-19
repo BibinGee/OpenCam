@@ -1,0 +1,142 @@
+OpenCam Note:
+By Bibin_zhi
+Date: 2018-10-8
+
+Python版去雾算法：
+def zmMinFilterGray(src, r=7):
+    '''最小值滤波，r是滤波器半径'''
+    if r <= 0:
+        return src
+    h, w = src.shape[:2]
+        
+    I = src
+ #   res = np.minimum(I  , I[[0]+range(h-1)  , :])
+ #   res = np.minimum(res, I[range(1,h)+[h-1], :])
+    res = np.minimum(I  , I[[0]+[x for x in range(h-1)]  , :])
+    res = np.minimum(res, I[[x for x in range(1,h)]+[h-1], :])
+    I = res
+##    res = np.minimum(I  , I[:, [0]+range(w-1)])
+##    res = np.minimum(res, I[:, range(1,w)+[w-1]])
+    
+    res = np.minimum(I  , I[:, [0]+[x for x in range(w-1)]])
+    res = np.minimum(res, I[:, [x for x in range(1,w)]+[w-1]])
+    
+    return zmMinFilterGray(res, r-1)
+ 
+def guidedfilter(I, p, r, eps):
+    '''引导滤波，直接参考网上的matlab代码'''
+    height, width = I.shape
+    m_I = cv2.boxFilter(I, -1, (r,r))
+    m_p = cv2.boxFilter(p, -1, (r,r))
+    m_Ip = cv2.boxFilter(I*p, -1, (r,r))
+    cov_Ip = m_Ip-m_I*m_p
+ 
+    m_II = cv2.boxFilter(I*I, -1, (r,r))
+    var_I = m_II-m_I*m_I
+ 
+    a = cov_Ip/(var_I+eps)
+    b = m_p-a*m_I
+ 
+    m_a = cv2.boxFilter(a, -1, (r,r))
+    m_b = cv2.boxFilter(b, -1, (r,r))
+    return m_a*I+m_b
+ 
+#输入rgb图像，值范围[0,1]
+def getV1(m, r, eps, w, maxV1):  
+    '''计算大气遮罩图像V1和光照值A, V1 = 1-t/A'''
+    V1 = np.min(m,2)                                         #得到暗通道图像
+    V1 = guidedfilter(V1, zmMinFilterGray(V1,7), r, eps)     #使用引导滤波优化
+    bins = 2000
+    ht = np.histogram(V1, bins)                              #计算大气光照A
+    d = np.cumsum(ht[0])/float(V1.size)
+    for lmax in range(bins-1, 0, -1):
+        if d[lmax]<=0.999:
+            break
+    A  = np.mean(m,2)[V1>=ht[1][lmax]].max()
+         
+    V1 = np.minimum(V1*w, maxV1)                   #对值范围进行限制
+     
+    return V1,A
+ 
+# 主要实现方法
+def deHaze(m, r=81, eps=0.001, w=0.95, maxV1=0.80, bGamma=False):
+    Y = np.zeros(m.shape)
+    V1,A = getV1(m, r, eps, w, maxV1)               #得到遮罩图像和大气光照
+    for k in range(3):
+        Y[:,:,k] = (m[:,:,k]-V1)/(1-V1/A)           #颜色校正
+    Y =  np.clip(Y, 0, 1)
+    if bGamma:
+        Y = Y**(np.log(0.5)/np.log(Y.mean()))       #gamma校正,默认不进行该操作
+return Y
+
+
+使用方法：
+       #通过摄像头读取一帧视频文件
+        ret, frame = cap.read()
+        frame = cv2.flip(frame,1)
+        cv2.imshow("Original",frame)
+        #高斯滤波
+         blurred = cv2.GaussianBlur(frame,(3,3),1)
+       # 执行去雾算法
+        result_img = deHaze(blurred/255.0)*15
+        cv2.imshow("Gaussian filter + haze removal,value = 15",result_img)
+
+
+一、图像对比度增强：
+    # 使用直方图均衡法，必须输入灰度图，彩色图像会导致错误
+    gray_img = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
+    equ_img = cv2.equalizeHist(gray_img)
+    img = np.hstack((gray_img,equ_img)
+    cv2.imshow("Gray enhencement",img)
+
+二、采用直方图进行亮度增强：
+    img_yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV )
+    img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+    img_output = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+
+三、采用gamma调整法，这个方法目前是可行性最好的
+def gamma_trans(img, gamma):
+    #具体做法先归一化到1，然后gamma作为指数值求出新的像素值再还原
+    gamma_table = [np.power(x/255.0,gamma)*255.0 for x in range(256)]
+    gamma_table = np.round(np.array(gamma_table)).astype(np.uint8)
+    #实现映射用的是Opencv的查表函数
+    return cv2.LUT(img,gamma_table)
+
+
+在图像中加入文字：
+font = cv2.FONT_HERSHEY_SIMPLEX
+Image = cv2.putText(result_img, text, (420, 470), font, 0.5, (0, 0, 255), 1)
+
+
+使用ffmpeg对avi视频转换为mp4视频：
+    cmd = 'ffmpeg -i \'%s\' \'%s\''%(ofile, nfile)
+    print('convert command started ', cmd)
+    # 使用subprocess.call() 进程调用命令行或shell执行ffmpeg转换命令
+    res = subprocess.call(cmd,shell = True)
+
+
+进程的作用
+# 使用args = (param1, param2)对函数进行参数传递
+    t = threading.Thread(target = videoThread, args = (cap1, 'video0') ,name='videoThread0')
+    t.start()
+
+
+进程锁的使用：
+    lock = threading.Lock()
+
+    lock.acquire()
+    try:
+        .......
+    finally:
+        .......
+    lock.release()
+
+字符串替换
+    nfile = nfile.replace('avi', 'mp4')
+
+opecv 视频纪录：
+    #  'D', 'I', 'V', 'X' 是指MPEG-4压缩格式 
+    fourcc = cv2.VideoWriter_fourcc('D', 'I', 'V', 'X')
+    fps = 18
+    out = cv2.VideoWriter (filename, fourcc ,fps, (image_h,image_w) )
+    a = out.write(img_output)

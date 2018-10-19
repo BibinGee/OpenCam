@@ -1,0 +1,61 @@
+Revision 1.0.0, 2018/10/11
+1. °×ÌìÊ¹ÓÃÔ­ÊÓÆµÍ¼Ïñ£¬ÍíÉÏÊ¹ÓÃ¾ùºâÔöÇ¿
+
+Revision 1.0.1, 2018/10/12
+1. ¸ÄÕýimage_out ÒýÓÃÎ´¶¨ÒåÎÊÌâ
+2. Ôö¼Ó´´½¨ÎÄ¼þ¼ÐÇ°£¬ÅÐ¶ÏÎÄ¼þ¼ÐÊÇ·ñ´æÔÚ¶¯×÷
+3. Ôö¼Ó×Ô¶¯É¾³ýÁ½ÌìÇ°ÊÓÆµ¹¦ÄÜ£¬²»±£ÁôÁ½ÌìÇ°ÊÓÆµ
+4. ¸Ä±äÊÓÆµ´óÐ¡£¬320 x 240 ¸Ä±ä 640 x 480
+5. ¸ü¸ÄÊÓÆµÂ·¾¶Îª£º'/media/pi/USB DISK/videos/'
+6. Ôö¼Ó620x480 ºÍ 320 x 240²»Í¬·Ö±æÂÊÊ±¼äÏÔÊ¾µÄÎ»ÖÃ¡£
+
+Revision 1.0.2, 2018/10/13
+1. Ôö¼ÓWindows ¸ùÎÄ¼þÄ¿Â¼root_dir
+2. ·¢ÏÖÒ»¸öBug£¬ÔÚÏÂÎçÊ±¼ä±£´æµÄÊÓÆµÎÄ¼þÌØ±ðÔÚ£¬Ô¼Ã¿·ÖÖÓ9MB,±ÈÆäËüÊ±¼ä¶à³ö3±¶¡£Ò»¸ö×î¶àÊ±ÓÐ1.7GB¡£
+   Õý³£ÊÓÆµÐ´Èë´óÐ¡ÎªÃ¿·ÖÖÓ3MB£¬Ò»¸öÐ¡Ê±Ô¼200MB¡£
+   Ä¿Ç°»¹Ã»ÓÐÕÒµ½Ô­Òò¡£
+3. ¶¨ÒåÖ¡Êý£º±Ê¼Ç±¾´óÔ¼Ã¿Ãë14~16Ö¡£¬Ê÷Ý®ÅÉ´óÔ¼7.6~8.3Ö¡Ã¿Ãë
+
+Revision 1.0.3, 2018/10/14
+1. Fix bug that cannot create a new folder when date changed
+2. add cost time for ffmpeg format convertion 
+3. add print information for folder created when date changed.
+4. vRecordº¯ÊýÖÐÓ¦ÓÃgamma_trans() ½øÐÐ²ÊÉ«ÔöÇ¿£¬°×ÌìÎªgamma = 0.7, Ò¹Íígamma = 0.25
+
+Revision 1.0.4, 2018/10/14
+4. Ôö¼ÓvideoThreadº¯Êý£¬Ê¹ÓÃÏß³ÌÀ´ÊµÏÖ¶àÉãÏñÍ·ÏÔÊ¾ºÍ¶ÁÈ¡
+5. ÔÚvRecord()º¯ÊýÖÐ£¬cv2.imshow(v_string, img_output)Ê¹ÓÃv_stringÀ´Çø·Ö²»Í¬µÄ´°¿Ú¾ä±ú£¬ÎªÃ¿Ò»¸öÉãÏñÍ·Éú³É¶ÀÁ¢µÄÊÓÆµ´°¿Ú
+6. ÖØÐÂ±àÐ´root_dir: 
+	if(platform.system() == 'Windows'):
+        root_dir = 'E:\\videos\\' + string + '\\'
+        if(os.path.exists(root_dir) == False):
+            os.mkdir(root_dir)       
+    else:
+        root_dir = '/media/pi/USB DISK/videos/' + string +'/'
+        if(os.path.exists(root_dir) == False):
+            os.mkdir(root_dir)  
+    ¼ÓÈëÎÄ¼þ¼ÐÊÇ·ñ´æÔÚÅÐ¶Ï·½·¨
+7. ÔÚvRecordº¯ÊýÖÐ¼ÓÈë½ø³ÌËø£¬Ê¹ÓÃ·½·¨:lock.acquire()ºÍlock.release()£¬·ÀÖ¹Ïß³Ì¼ä¾ºÕù
+8. ÔÚvRecordÖÐ¼ÓÈëÃ¿¸öÏß³ÌµÄÊ¹ÓÃÊ±¼ä
+9. ÔÚavi2mp4º¯ÊýÖÐ¼ÓÈëlock_for_avi2mp4.acquire()ºÍlock_for_avi2mp4.release()£¬·ÀÖ¹Ïß³Ì¼ä¾ºÕù
+
+
+Revision 1.0.5, 2018/10/14
+1. É¾³ý×¢ÊÍ²¿·Ö
+
+Revision 1.0.6, 2018/10/16
+1. ¸ù¾Ýµ±Ç°Ê±¼ä³õÊ¼»¯part index
+
+Revision 1.0.7 2018/10/18
+1. linuxÏµÍ³ÔÚÓ¦ÓÃ¶àÏß³ÌµÄÊ±ºò£¬Ö´ÐÐµ½cv2.imshow()º¯ÊýÊ±£¬³öÏÖbug£¬Ã»ÓÐÒ»¸öÉãÏñÍ·¿ÉÒÔÏÔÊ¾ÊÓÆµ¡£
+    ¼´Ê¹¼ÓÈëÁËÏß³ÌËøÒ²Ã»ÓÐ°ì·¨½â¾ö¡£È»¶øÔÚwindowsÏµÍ³È´Ã»ÓÐÎÊÌâ¡£
+2. ½«Ô­À´µÄÏß³Ì¸ÄÎªµ¥Ïß³Ì£¬Ê¹ÓÃwhile + for ÂÖÁ÷²ÉÑùÊÓÆµÊý¾Ý
+3. Ôö¼Ó mp4_dirs, root_dirs, outsµÈÁÐ±í
+4. ¸ü¸Äavi2mp4º¯Êý£¬È¡ÏûÈ«¾Ö±äÁ¿mp4_dirºÍlast_file£¬²ÉÓÃ´«Èë²ÎÊý·½Ê½Ö¸¶¨aviÎÄ¼þºÍmp4ÊÓÆµ´æ·ÅÂ·¾¶
+5. ¸ü¸Äº¯ÊýÃû³Æ:vRecord -> getVideo; vWriter -> getWriter;
+6. Ê¹ÓÃÒ»¸öÏß³ÌÆô¶¯ÊÓÆµ¼à¿Ø³ÌÐò£¬±£ÁôÖ÷Ïß³Ì
+7. Ò¹¼ägammarÖµÓÉ0.25¸ÄÎª0.23, ÁÁ¶ÈÔöÇ¿
+
+Revision 1.0.8 2018/10/19
+1. ÔÚavi2mp4ÏµÍ³ÖÐ£¬¸üÕý£ºµ±ÒÆ³ýÎÄ¼þÖ»Êä³öÒ»¸öÎÄ¼þÃûµÄbug£»¸üÕýÖØ¸´Êä³öÏß³ÌÃûµÄ´íÎó£»¸üÕýÊä³öÁ½´ÎÍê³ÉÊ±¼äµÄ´íÎó¡£3
+2. 增加cv2.namedWindow()和cv2.moveWindow()两个函数，程序开始时创建窗口和设置显示位置
